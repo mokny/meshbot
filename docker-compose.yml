@@ -1,0 +1,25 @@
+services:
+  meshtastic-bot:
+    build: .
+    container_name: meshtastic-bot
+    restart: unless-stopped
+    environment:
+      # The bot reads this file on startup. The folder is mounted persistently below.
+      - CONFIG_PATH=/config/config.toml
+      # Uncomment the NINA_* lines if you want to use the NINA-Warn messages.
+      #- NINA_ENABLED=true
+      #- NINA_STATE=NRW
+      #- NINA_INTERVAL_SECONDS=300
+      #- NINA_CHANNEL=7
+      #- NINA_DESTINATION_ID=^all
+      #- NINA_DB_PATH=/config/nina_posted.sqlite
+    volumes:
+      # Persist config + SQLite DB on the host.
+      - ./config:/config
+      - ./plugins:/plugins
+    ports:
+      # Expose the HTTP API
+      - "8080:8080"
+    # If you are on Linux and want host networking, you can uncomment the next line
+    # and remove the ports section:
+    # network_mode: "host"

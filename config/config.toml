@@ -1,0 +1,74 @@
+# MeshBot configuration
+# More info at https://github.com/mokny/meshbot
+
+[nodes]
+list = [
+  # Add one or more nodes (WiFi TCP interface)
+  # Your meshtastic node must be reachable via wifi!
+  { host = "192.168.178.155", port = 4403, name = "home-node" }
+]
+
+[bot]
+name = "MeshBot"
+
+# Optional mapping of channel index to friendly name.
+# This is useful for:
+# - displaying channel names in logs/webhook payloads
+# - referencing channels by name in allow-lists / blocks
+channel_names = {0 = "Primary", 1 = "MyPrivateChannel", 2 = "MyOtherChannel"}
+
+# If set, bot will only respond to commands in these channels (indices OR names).
+# DMs are still processed.
+channels = [0,1,2]  # or ["Primary","MyPrivateChannel","MyOtherChannel"]
+strict = false
+
+# Block commands per channel (indices or names). Use "dm" to block in DMs.
+[bot.command_blocks]
+#"/stats" = [0]
+#"/ping" = [0]
+#"/user" = ["dm"]
+
+[logging]
+level = "INFO" # ERROR|WARNING|INFO|DEBUG|TRACE
+
+[api]
+listen_host = "0.0.0.0"
+listen_port = 8080
+# Configure one or more authentication tokens. MUST Change this!
+tokens = ["CHANGEME_TOKEN", "CHANGEME_ANOTHER_TOKEN"]
+
+[db]
+path = "/config/bot.db"
+keep_per_conversation = 10000
+
+[webhook]
+url = ""  # e.g. "https://example.local/webhook"
+timeout_seconds = 5
+
+[heartbeat]
+enabled = false
+interval_seconds = 3600
+message = "This message is broadcasted every 3600 seconds"
+mode = "broadcast" # broadcast|dm
+targets = []
+channel = 0
+
+[schedules]
+enabled = true
+timezone = "Europe/Berlin"
+items = [
+  # Example: weekdays at 08:00 in channel 0
+  { time = "08:00", channel = 0, destination_id = "^all", text = "Good morning. I just installed MeshBot https://github.com/mokny/meshbot", days = ["mon","tue","wed","thu","fri"] }
+]
+
+[commands]
+list = [
+  # Add custom commands
+  { trigger = "/telegram", response = "Telegram Gruppe:\nhttps://t.me/meshnrw" },
+  { trigger = "/bot", response = "Open-Source:\nhttps://github.com/mokny/meshbot" },
+  
+]
+
+[plugins]
+enabled = true
+path = "/plugins"
