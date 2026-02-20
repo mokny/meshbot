@@ -11,7 +11,8 @@ This bot features...
 - extendable via plugin system
 
 ## Requirements
-Docker
+- Docker
+- A Meshtastic node that is connected to the same network as the machine the bot should run on
 
 ## Installation
 Download the latest release and extract it to a dedicated directory.
