@@ -1,4 +1,4 @@
-# MeshBot - A full features Meshtastic Bot
+# MeshBot - A full featured Meshtastic Bot
 
 This bot features...
 - chat commands
