@@ -15,7 +15,10 @@ This bot features...
 - A Meshtastic node that is connected to the same network as the machine the bot should run on
 
 ## Installation
-Download the latest release and extract it to a dedicated directory.
+```bash
+git clone https://github.com/mokny/meshbot
+cd meshbot
+```
 
 ## Configuration
 Edit `config/config.toml`.
@@ -36,3 +39,8 @@ Use either:
 - `Authorization: Bearer <token>`
 - `X-Api-Token: <token>`
 
+# Changelog
+###2.01
+- Added `commands_enabled` option. By default ALL commands are disabled. Set this option to `true` in the config.toml file to make your bot respond to commands.
+###2.0
+- Initial release
