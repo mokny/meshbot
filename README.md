@@ -21,7 +21,7 @@ cd meshbot
 ```
 
 ## Configuration
-Edit `config/config.toml`.
+Edit the well documented `config/config.toml`. Make sure to set `commands_enabled` to `true`, if you want your bot to reply to commands. Otherwise there will be a lot of silence, as this option is disabled by default. Also make sure to change the API-Tokens, even if you do not use the API! (!!)
 
 ## Run
 ```bash
@@ -34,7 +34,9 @@ docker compose up -d
 docker compose logs -f
 ```
 
-## API Authentication
+## The bot has an API...
+Yep it has and its configuration is stored in the `config/config.toml` file. Attention: Even if you do not use the API, change the authentication tokens in the configuration!
+To access the bot API, you need to send one of the configured auth tokens inside your POST request header.
 Use either:
 - `Authorization: Bearer <token>`
 - `X-Api-Token: <token>`
