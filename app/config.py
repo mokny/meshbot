@@ -316,6 +316,7 @@ class BotCfg:
     channel_names: Dict[int, str] = field(default_factory=dict)
     # strict = true -> only react to commands (ignore other text)
     strict: bool = False
+    commands_enabled: bool = False
     # command blocks
     command_blocks: Dict[str, List[int]] = field(default_factory=dict)
     command_blocks_dm: List[str] = field(default_factory=list)
@@ -371,6 +372,7 @@ def load_config(path: str) -> AppCfg:
         channels=_resolve_channels(bot_raw.get("channels"), channel_names),
         channel_names=channel_names,
         strict=_bool(bot_raw.get("strict"), False),
+        commands_enabled=_bool(bot_raw.get("commands_enabled"), False),
         command_blocks=blocks_map,
         command_blocks_dm=dm_blocks,
     )
@@ -489,6 +491,7 @@ def save_config(path: str, cfg: AppCfg) -> None:
             "channels": cfg.bot.channels,
             "channel_names": {str(k): v for k, v in (cfg.bot.channel_names or {}).items()},
             "strict": cfg.bot.strict,
+            "commands_enabled": cfg.bot.commands_enabled,
             "command_blocks": {k: v for k, v in (cfg.bot.command_blocks or {}).items()},
         },
         "webhook": {"url": cfg.webhook.url, "timeout_seconds": cfg.webhook.timeout_seconds},
