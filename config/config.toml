@@ -9,7 +9,11 @@ list = [
 ]
 
 [bot]
+# Your bot custom name
 name = "MeshBot"
+
+# If you want your bot to react to comannds like /ping /help,... set this to true
+commands_enabled = false
 
 # Optional mapping of channel index to friendly name.
 # This is useful for:
