@@ -40,7 +40,8 @@ Use either:
 - `X-Api-Token: <token>`
 
 # Changelog
-###2.01
+### 2.01
 - Added `commands_enabled` option. By default ALL commands are disabled. Set this option to `true` in the config.toml file to make your bot respond to commands.
-###2.0
+
+### 2.0
 - Initial release
