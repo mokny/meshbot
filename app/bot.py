@@ -54,6 +54,8 @@ from .config import AppCfg
 from .db import BotDB
 from .plugins import PluginManager
 
+# Botversion
+BOTVERSION = "2.01"
 
 # TRACE is a custom log level more verbose than DEBUG.
 TRACE = 5
@@ -580,6 +582,9 @@ class MeshBot:
         pub.subscribe(self._on_receive, "meshtastic.receive")
         pub.subscribe(self._on_receive, "meshtastic.receive.data")
 
+        # Version info
+        self.log.info("Version: %s by Till Vennefrohne https://github.com/mokny/meshbot", BOTVERSION)
+
         # Load plugins from disk (alphabetical order)
         self.plugins.load_all()
 
@@ -593,6 +598,11 @@ class MeshBot:
         self.log.info("Schedules loaded: %d item(s)", len(self.cfg.schedules.items or []))
         self.log.info("Command blocks loaded: %s | DM blocks: %s",
                       self.cfg.bot.command_blocks, self.cfg.bot.command_blocks_dm)
+
+        if self.cfg.bot.commands_enabled:
+            self.log.info("Bot-Commands enabled.")
+        else:                
+            self.log.info("Bot-Commands disabled in config.toml. The bot will not react to any command.")
 
         # Start worker threads
         threading.Thread(target=self._loop, name="bot-loop", daemon=True).start()
@@ -1066,7 +1076,7 @@ class MeshBot:
     def _make_help(self) -> str:
         """Generate /help output."""
         lines = [
-            "⚠️ Help",
+            "⚠️ Help (v"+BOTVERSION+")",
             "/ping",
             "/user",
             "/user <!idxxx>",
@@ -1227,70 +1237,71 @@ class MeshBot:
             dest = _reply_dest(packet, from_id)
 
             lower = text.lower()
-
-            # ----- built-in commands -----
-
-            if lower.startswith("/help"):
-                client.send_text(self._make_help(), destination_id=dest, channel_index=channel_index)
-                continue
-
-            if lower.startswith("/ping"):
-                # Resolve short name (packet -> interface.nodes -> DB fallback)
-                short = (inc.short or "").strip()
-                if not short and from_id:
-                    s_db, _ = self.db.get_latest_name(from_id)
-                    short = (s_db or "").strip()
-                if not short:
-                    short = from_id or "unknown"
-
-                reply = f"Pong {short} | hops={_hops(packet)} | via={_via(packet)}"
-                client.send_text(reply, destination_id=dest, channel_index=channel_index)
-                continue
-
-            if lower.startswith("/stats"):
-                s = self.get_stats()
-                out = "\n".join([
-                    f"Uptime: {s.get('uptime_human')}",
-                    f"DB users: {s.get('db_users', 0)} (name rows: {s.get('db_name_rows', 0)})",
-                    f"RX msgs: {s.get('rx_messages', 0)} | TX msgs: {s.get('tx_messages', 0)}",
-                ])
-                client.send_text(out, destination_id=dest, channel_index=channel_index)
-                continue
-
-            if lower.startswith("/user"):
-                # /user with no arg -> show info about sender
-                parts = text.split()
-                target = parts[1].strip() if len(parts) >= 2 else from_id
-
-                info = self.get_user_info(target, name_limit=20, name_order="desc")
-                if not info:
-                    client.send_text(f"No data for {target}", destination_id=dest, channel_index=channel_index)
+            
+            if self.cfg.bot.commands_enabled:
+                # ----- built-in commands -----
+    
+                if lower.startswith("/help"):
+                    client.send_text(self._make_help(), destination_id=dest, channel_index=channel_index)
                     continue
-
-                def fmt_ts(tsv: int) -> str:
-                    # We intentionally use UTC in responses for consistent interpretation.
-                    return time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(int(tsv)))
-
-                hist = info.get("name_history", [])
-                lines = [
-                    f"ID: {target}",
-                    f"First: {fmt_ts(info['first_seen'])}",
-                    f"Names: {max(0, int(info.get('name_entries', 0)))}",
-                    "History:",
-                ]
-                if not hist:
-                    lines.append("- (no names recorded yet)")
-                else:
-                    for h in hist:
-                        lines.append(
-                            f"- {fmt_ts(h['seen_at'])} | ({h.get('short') or '-'}) {h.get('long') or '-'}"
-                        )
-
-                client.send_text("\n".join(lines), destination_id=dest, channel_index=channel_index)
-                continue
-
-            # ----- custom commands -----
-
-            resp = self._handle_custom_command(text, from_id, channel_index, node_key)
-            if resp:
-                client.send_text(resp, destination_id=dest, channel_index=channel_index)
+    
+                if lower.startswith("/ping"):
+                    # Resolve short name (packet -> interface.nodes -> DB fallback)
+                    short = (inc.short or "").strip()
+                    if not short and from_id:
+                        s_db, _ = self.db.get_latest_name(from_id)
+                        short = (s_db or "").strip()
+                    if not short:
+                        short = from_id or "unknown"
+    
+                    reply = f"Pong {short} | hops={_hops(packet)} | via={_via(packet)}"
+                    client.send_text(reply, destination_id=dest, channel_index=channel_index)
+                    continue
+    
+                if lower.startswith("/stats"):
+                    s = self.get_stats()
+                    out = "\n".join([
+                        f"Uptime: {s.get('uptime_human')}",
+                        f"DB users: {s.get('db_users', 0)} (name rows: {s.get('db_name_rows', 0)})",
+                        f"RX msgs: {s.get('rx_messages', 0)} | TX msgs: {s.get('tx_messages', 0)}",
+                    ])
+                    client.send_text(out, destination_id=dest, channel_index=channel_index)
+                    continue
+    
+                if lower.startswith("/user"):
+                    # /user with no arg -> show info about sender
+                    parts = text.split()
+                    target = parts[1].strip() if len(parts) >= 2 else from_id
+    
+                    info = self.get_user_info(target, name_limit=20, name_order="desc")
+                    if not info:
+                        client.send_text(f"No data for {target}", destination_id=dest, channel_index=channel_index)
+                        continue
+    
+                    def fmt_ts(tsv: int) -> str:
+                        # We intentionally use UTC in responses for consistent interpretation.
+                        return time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(int(tsv)))
+    
+                    hist = info.get("name_history", [])
+                    lines = [
+                        f"ID: {target}",
+                        f"First: {fmt_ts(info['first_seen'])}",
+                        f"Names: {max(0, int(info.get('name_entries', 0)))}",
+                        "History:",
+                    ]
+                    if not hist:
+                        lines.append("- (no names recorded yet)")
+                    else:
+                        for h in hist:
+                            lines.append(
+                                f"- {fmt_ts(h['seen_at'])} | ({h.get('short') or '-'}) {h.get('long') or '-'}"
+                            )
+    
+                    client.send_text("\n".join(lines), destination_id=dest, channel_index=channel_index)
+                    continue
+    
+                # ----- custom commands -----
+    
+                resp = self._handle_custom_command(text, from_id, channel_index, node_key)
+                if resp:
+                    client.send_text(resp, destination_id=dest, channel_index=channel_index)
