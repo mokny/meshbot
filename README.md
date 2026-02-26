@@ -39,6 +39,9 @@ Use either:
 - `Authorization: Bearer <token>`
 - `X-Api-Token: <token>`
 
+## Using plugins
+Plugins are located in the `plugins` directory. Plugins are individual Python programs that receive events from the bot and that can access the main functions of the bot. Plugins are loaded in alphabetical order. Plugins whose filenames start with `_` (underscore), are disabled and will not be loaded. If you want to get into plugin coding, please refer to the included example plugin that can be used as a template.
+
 # Changelog
 ### 2.01
 - Added `commands_enabled` option. By default ALL commands are disabled. Set this option to `true` in the config.toml file to make your bot respond to commands.
